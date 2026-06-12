@@ -36,7 +36,9 @@ public class DebitRequestedConsumer {
             DebitRequestedEvent event
     ) {
 
-
+        System.out.println(
+                "DEBIT CONSUMER EXECUTED"
+        );
 
             accountService.debit(
                     event.getAccountNumber(),

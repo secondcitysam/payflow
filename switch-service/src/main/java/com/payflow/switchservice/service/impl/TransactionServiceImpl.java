@@ -4,6 +4,7 @@ import com.payflow.common.enums.TransactionStatus;
 import com.payflow.common.event.TransactionCreatedEvent;
 import com.payflow.switchservice.entity.Transaction;
 import com.payflow.switchservice.exception.BusinessException;
+import com.payflow.switchservice.exception.DuplicateTransactionException;
 import com.payflow.switchservice.exception.ResourceNotFoundException;
 import com.payflow.switchservice.producer.TransactionProducer;
 import com.payflow.switchservice.redis.RateLimitService;
@@ -23,22 +24,21 @@ public class TransactionServiceImpl
     private final TransactionProducer transactionProducer;
     private final RedisService redisService;
     private final RateLimitService rateLimitService;
+
     @Override
     public Transaction createTransaction(
             Transaction transaction,
             String idempotencyKey
     ) {
 
-        if(redisService.exists(idempotencyKey))
-        {
-            String reference =
-                    redisService.getTransactionReference(
-                            idempotencyKey
-                    );
 
-            return transactionRepository
-                    .findByTransactionReference(reference)
-                    .orElseThrow();
+        if(!redisService.acquireIdempotencyLock(
+                idempotencyKey
+        ))
+        {
+            throw new BusinessException(
+                    "Duplicate Request"
+            );
         }
 
         transaction.setTransactionReference(

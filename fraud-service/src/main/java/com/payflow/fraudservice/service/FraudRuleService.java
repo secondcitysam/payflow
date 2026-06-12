@@ -11,7 +11,7 @@ public class FraudRuleService {
             TransactionCreatedEvent event
     ) {
 
-        if(event.getAmount().doubleValue() > 50000)
+        if(event.getAmount().doubleValue() > 1000000)
         {
             return FraudResult.MANUAL_REVIEW;
         }

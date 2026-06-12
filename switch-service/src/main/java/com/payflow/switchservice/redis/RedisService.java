@@ -12,6 +12,24 @@ public class RedisService {
 
     private final StringRedisTemplate redisTemplate;
 
+    public boolean acquireIdempotencyLock(
+            String key
+    ) {
+
+        Boolean success =
+                redisTemplate
+                        .opsForValue()
+                        .setIfAbsent(
+                                key,
+                                "PROCESSING",
+                                Duration.ofHours(24)
+                        );
+
+        return Boolean.TRUE.equals(
+                success
+        );
+    }
+
     public void saveIdempotencyKey(
             String key,
             String transactionReference
@@ -28,7 +46,9 @@ public class RedisService {
             String key
     ) {
 
-        return redisTemplate.opsForValue().get(key);
+        return redisTemplate
+                .opsForValue()
+                .get(key);
     }
 
     public boolean exists(
