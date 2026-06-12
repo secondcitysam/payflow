@@ -22,4 +22,19 @@ public final class KafkaTopics {
 
     public static final String CREDIT_COMPLETED =
             "credit-completed";
+
+    public static final String REVERSAL_REQUESTED =
+            "reversal-requested";
+
+    public static final String REVERSAL_COMPLETED =
+            "reversal-completed";
+
+    public static final String DEBIT_REQUESTED_DLT =
+            "debit-requested-dlt";
+
+    public static final String CREDIT_REQUESTED_DLT =
+            "credit-requested-dlt";
+
+    public static final String REVERSAL_REQUESTED_DLT =
+            "reversal-requested-dlt";
 }

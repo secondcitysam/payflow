@@ -47,4 +47,34 @@ public class KafkaConfig {
                 (short) 1
         );
     }
+
+    @Bean
+    public NewTopic reversalRequestedTopic() {
+
+        return new NewTopic(
+                KafkaTopics.REVERSAL_REQUESTED,
+                3,
+                (short) 1
+        );
+    }
+
+    @Bean
+    public NewTopic reversalCompletedTopic() {
+
+        return new NewTopic(
+                KafkaTopics.REVERSAL_COMPLETED,
+                3,
+                (short) 1
+        );
+    }
+
+    @Bean
+    public NewTopic debitRequestedDltTopic() {
+
+        return new NewTopic(
+                KafkaTopics.DEBIT_REQUESTED_DLT,
+                3,
+                (short) 1
+        );
+    }
 }

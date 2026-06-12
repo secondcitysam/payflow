@@ -3,7 +3,9 @@ package com.payflow.switchservice.consumer;
 import com.payflow.common.constants.KafkaTopics;
 import com.payflow.common.enums.TransactionStatus;
 import com.payflow.common.event.CreditCompletedEvent;
+import com.payflow.common.event.ReversalRequestedEvent;
 import com.payflow.switchservice.entity.Transaction;
+import com.payflow.switchservice.producer.ReversalRequestedProducer;
 import com.payflow.switchservice.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -15,6 +17,8 @@ public class CreditCompletedConsumer {
 
     private final TransactionRepository repository;
 
+    private final ReversalRequestedProducer
+            reversalProducer;
     @KafkaListener(
             topics = KafkaTopics.CREDIT_COMPLETED,
             groupId = "switch-group"
@@ -39,7 +43,23 @@ public class CreditCompletedConsumer {
         else
         {
             transaction.setStatus(
-                    TransactionStatus.FAILED
+                    TransactionStatus.REVERSAL_INITIATED
+            );
+
+            reversalProducer.publish(
+
+                    ReversalRequestedEvent
+                            .builder()
+                            .transactionReference(
+                                    transaction.getTransactionReference()
+                            )
+                            .accountNumber(
+                                    transaction.getSenderAccount()
+                            )
+                            .amount(
+                                    transaction.getAmount()
+                            )
+                            .build()
             );
         }
 

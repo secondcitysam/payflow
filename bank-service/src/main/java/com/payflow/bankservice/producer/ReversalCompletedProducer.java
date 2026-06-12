@@ -1,2 +1,26 @@
-package com.payflow.bankservice.producer;public class ReversalCompletedProducer {
+package com.payflow.bankservice.producer;
+
+import com.payflow.common.constants.KafkaTopics;
+import com.payflow.common.event.ReversalCompletedEvent;
+import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+public class ReversalCompletedProducer {
+
+    private final KafkaTemplate<String, Object>
+            kafkaTemplate;
+
+    public void publish(
+            ReversalCompletedEvent event
+    ) {
+
+        kafkaTemplate.send(
+                KafkaTopics.REVERSAL_COMPLETED,
+                event.getTransactionReference(),
+                event
+        );
+    }
 }

@@ -7,6 +7,8 @@ import com.payflow.common.event.DebitRequestedEvent;
 import com.payflow.bankservice.producer.DebitCompletedProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.RetryableTopic;
+import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,6 +20,14 @@ public class DebitRequestedConsumer {
     private final DebitCompletedProducer producer;
     private String receiverAccount;
 
+    @RetryableTopic(
+            attempts = "3",
+            backoff = @Backoff(
+                    delay = 2000,
+                    multiplier = 2.0
+            ),
+            dltTopicSuffix = "-dlt"
+    )
     @KafkaListener(
             topics = KafkaTopics.DEBIT_REQUESTED,
             groupId = "bank-group"
@@ -26,7 +36,7 @@ public class DebitRequestedConsumer {
             DebitRequestedEvent event
     ) {
 
-        try {
+
 
             accountService.debit(
                     event.getAccountNumber(),
@@ -48,19 +58,6 @@ public class DebitRequestedConsumer {
                             .build()
             );
 
-        } catch (Exception ex) {
 
-            producer.publish(
-                    DebitCompletedEvent.builder()
-                            .transactionReference(
-                                    event.getTransactionReference()
-                            )
-                            .success(false)
-                            .message(
-                                    ex.getMessage()
-                            )
-                            .build()
-            );
-        }
     }
 }
