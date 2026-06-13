@@ -4,8 +4,10 @@ import com.payflow.common.constants.KafkaTopics;
 import com.payflow.common.enums.TransactionStatus;
 import com.payflow.common.event.CreditCompletedEvent;
 import com.payflow.common.event.ReversalRequestedEvent;
+import com.payflow.common.event.TransactionSuccessEvent;
 import com.payflow.switchservice.entity.Transaction;
 import com.payflow.switchservice.producer.ReversalRequestedProducer;
+import com.payflow.switchservice.producer.TransactionSuccessProducer;
 import com.payflow.switchservice.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -19,6 +21,10 @@ public class CreditCompletedConsumer {
 
     private final ReversalRequestedProducer
             reversalProducer;
+
+    private final TransactionSuccessProducer
+            successProducer;
+
     @KafkaListener(
             topics = KafkaTopics.CREDIT_COMPLETED,
             groupId = "switch-group"
@@ -38,6 +44,24 @@ public class CreditCompletedConsumer {
         {
             transaction.setStatus(
                     TransactionStatus.SUCCESS
+            );
+
+            successProducer.publish(
+
+                    TransactionSuccessEvent.builder()
+                            .transactionReference(
+                                    transaction.getTransactionReference()
+                            )
+                            .senderBank(
+                                    transaction.getSenderBank()
+                            )
+                            .receiverBank(
+                                    transaction.getReceiverBank()
+                            )
+                            .amount(
+                                    transaction.getAmount()
+                            )
+                            .build()
             );
         }
         else

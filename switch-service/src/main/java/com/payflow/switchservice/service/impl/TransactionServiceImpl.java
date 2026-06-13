@@ -1,5 +1,6 @@
 package com.payflow.switchservice.service.impl;
 
+import com.payflow.common.constants.KafkaTopics;
 import com.payflow.common.enums.TransactionStatus;
 import com.payflow.common.event.TransactionCreatedEvent;
 import com.payflow.switchservice.entity.Transaction;
@@ -10,6 +11,7 @@ import com.payflow.switchservice.producer.TransactionProducer;
 import com.payflow.switchservice.redis.RateLimitService;
 import com.payflow.switchservice.redis.RedisService;
 import com.payflow.switchservice.repository.TransactionRepository;
+import com.payflow.switchservice.service.OutboxService;
 import com.payflow.switchservice.service.TransactionService;
 import com.payflow.switchservice.util.TransactionReferenceGenerator;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +26,8 @@ public class TransactionServiceImpl
     private final TransactionProducer transactionProducer;
     private final RedisService redisService;
     private final RateLimitService rateLimitService;
-
+    private final OutboxService
+            outboxService;
     @Override
     public Transaction createTransaction(
             Transaction transaction,
@@ -85,9 +88,10 @@ public class TransactionServiceImpl
                         )
                         .build();
 
-        transactionProducer
-                .publishTransactionCreatedEvent(event);
-
+        outboxService.saveEvent(
+                KafkaTopics.TRANSACTION_CREATED,
+                event
+        );
         return savedTransaction;
     }
 
