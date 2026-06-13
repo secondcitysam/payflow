@@ -8,6 +8,8 @@ public final class KafkaTopics {
     public static final String TRANSACTION_CREATED =
             "transaction-created";
 
+    public static final String TRANSACTION_SUCCESS =
+            "transaction-success";
     public static final String TRANSACTION_FRAUD_RESULT =
             "transaction-fraud-result";
 
